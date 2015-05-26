@@ -1,4 +1,6 @@
 .idea
+.libs
 *.iml
 todo.txt
+punxsutawney*.jar
 
