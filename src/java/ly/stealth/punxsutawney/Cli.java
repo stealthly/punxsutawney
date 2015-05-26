@@ -41,7 +41,7 @@ public class Cli {
 
         app.cpus = options.cpus;
         app.mem = options.mem;
-        app.cmd = "while true; do echo 'Hello World'; sleep 1; done";
+        app.cmd = "java -Xmx" + options.mem + "m -cp punxsutawney.jar ly.stealth.punxsutawney.Requester";
 
         HttpServer httpServer = new HttpServer();
         httpServer.setPort(options.listen.getPort());
