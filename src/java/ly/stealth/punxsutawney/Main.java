@@ -16,7 +16,7 @@ import java.util.Properties;
 import static java.lang.System.err;
 import static java.lang.System.out;
 
-public class Cli {
+public class Main {
     public static void main(String... args) throws Exception {
         initLogging();
 
@@ -41,7 +41,10 @@ public class Cli {
 
         app.cpus = options.cpus;
         app.mem = options.mem;
-        app.cmd = "java -Xmx" + options.mem + "m -cp punxsutawney.jar ly.stealth.punxsutawney.Requester";
+        app.cmd = "java -Xmx" + options.mem + "m -cp punxsutawney.jar ly.stealth.punxsutawney.HttpClient";
+
+        app.env.put("HC_ZK", "master:2181");
+        app.env.put("HC_ID", app.id);
 
         HttpServer httpServer = new HttpServer();
         httpServer.setPort(options.listen.getPort());
@@ -54,10 +57,7 @@ public class Cli {
         out.println("Starting app \"" + app.id + "\" ...");
         Marathon.startApp(app);
 
-        Thread.sleep(60000);
-
-        out.println("Stopping app \"" + app.id + "\" ...");
-        Marathon.stopApp(app.id);
+        out.println("App \"" + app.id + "\" started");
         httpServer.stop();
     }
 

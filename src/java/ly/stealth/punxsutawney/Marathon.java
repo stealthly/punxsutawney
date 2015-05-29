@@ -10,9 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Marathon {
     public static String url = "http://master:8080";
@@ -105,6 +103,7 @@ public class Marathon {
         public int instances = 1;
         public List<Integer> ports = new ArrayList<>();
         public List<String> uris = new ArrayList<>();
+        public Map<String, String> env = new HashMap<>();
 
         public String cmd;
 
@@ -117,8 +116,9 @@ public class Marathon {
             obj.put("mem", mem);
 
             obj.put("instances", instances);
-            obj.put("ports", ports);
-            obj.put("uris", uris);
+            if (!ports.isEmpty()) obj.put("ports", ports);
+            if (!uris.isEmpty()) obj.put("uris", uris);
+            if (!env.isEmpty()) obj.put("env", env);
 
             obj.put("cmd", cmd);
             return obj;
