@@ -57,7 +57,7 @@ public class Main {
         out.println("Starting app \"" + app.id + "\" ...");
         Marathon.startApp(app);
 
-        out.println("App  started");
+        out.println("App started");
         httpServer.stop();
     }
 

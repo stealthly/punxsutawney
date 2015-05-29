@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class Requests implements Iterable<Requests.Request>, Serializable {
+    private long timeout = 30000;
     private List<Request> requests = new ArrayList<>();
 
     public Requests() {}
@@ -13,6 +14,9 @@ public class Requests implements Iterable<Requests.Request>, Serializable {
         try { requests = (List<Request>) new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject(); }
         catch (IOException | ClassNotFoundException e) { throw new IOError(e); }
     }
+
+    public long getTimeout() { return timeout; }
+    public void setTimeout(long timeout) { this.timeout = timeout; }
 
     public Request add(Request request) { requests.add(request); return request; }
     public void remove(Request request) { requests.remove(request); }

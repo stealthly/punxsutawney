@@ -12,10 +12,9 @@ import org.eclipse.jetty.client.api.Result;
 import org.eclipse.jetty.client.util.BytesContentProvider;
 import org.eclipse.jetty.http.HttpMethod;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.out;
 
@@ -35,7 +34,6 @@ public class HttpClient {
         props.put("group.id", id);
         props.put("zookeeper.session.timeout.ms", "400");
         props.put("zookeeper.sync.time.ms", "200");
-        props.put("auto.commit.interval.ms", "1000");
 
         ConsumerConnector consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
         KafkaStream<byte[],byte[]> stream = consumer.createMessageStreams(Collections.singletonMap(id, 1)).get(id).get(0);
@@ -56,17 +54,27 @@ public class HttpClient {
         }
     }
 
-    private static void sendRequests(Requests requests) throws Exception {
+    static void sendRequests(Requests requests) throws Exception {
         org.eclipse.jetty.client.HttpClient client = new org.eclipse.jetty.client.HttpClient();
-        client.setConnectTimeout(30000);
+        client.setConnectTimeout(requests.getTimeout());
+        client.setMaxRequestsQueuedPerDestination(requests.size());
 
         final CountDownLatch completed = new CountDownLatch(requests.size());
+
+        final AtomicInteger failed = new AtomicInteger();
+        final List<Throwable> failures = new ArrayList<>();
+
         Response.CompleteListener listener = new Response.CompleteListener() {
             public void onComplete(Result result) {
+                if (result.isFailed()) {
+                    failed.incrementAndGet();
+                    if (failures.size() < 3) failures.add(result.getFailure());
+                }
                 completed.countDown();
-                out.println(result.getResponse());
             }
         };
+
+        long start = System.currentTimeMillis();
         client.start();
 
         out.println("Sending " + requests.size() + " requests ...");
@@ -82,8 +90,16 @@ public class HttpClient {
         }
 
         completed.await();
-        out.println("Sent " + requests.size() + " requests");
-
         client.stop();
+        long time = System.currentTimeMillis() - start;
+        double rps = Math.floor(requests.size() * 10d * 1000 / time) / 10;
+
+        out.println("Failed:" + failed.get() + "/" + requests.size() + ", speed:" + rps + "rps");
+
+        if (!failures.isEmpty()) {
+            out.println("Failures (" + failures.size() + "/" + failed.get() + "):");
+            for (Throwable failure : failures)
+                failure.printStackTrace(out);
+        }
     }
 }
