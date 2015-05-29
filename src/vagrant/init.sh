@@ -40,11 +40,18 @@ install_marathon() {
     service marathon start
 }
 
-install_docker() {
-    apt-get install -qy lxc-docker
-    echo 'docker,mesos' > /etc/mesos-slave/containerizers
-    echo '5mins' > /etc/mesos-slave/executor_registration_timeout
-    service mesos-slave restart
+install_kafka() {
+    pushd /opt/
+    wget http://www.us.apache.org/dist/kafka/0.8.2.1/kafka_2.11-0.8.2.1.tgz
+    tar -xf kafka*.tgz
+    rm kafka*.tgz
+
+    sed -i "2i export KAFKA_HEAP_OPTS=\"-Xmx128m -Xms128m\"" kafka*/bin/kafka-server-start.sh
+    popd
+
+    cp kafka /etc/init.d
+    update-rc.d kafka defaults
+    service kafka start
 }
 
 if [[ $1 != "master" && $1 != "slave" ]]; then
@@ -81,16 +88,14 @@ DISTRO=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 CODENAME=$(lsb_release -cs)
 echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | tee /etc/apt/sources.list.d/mesosphere.list
 
-# add docker repo
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
-echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
-
 apt-get -qy update
 
 # install deps
 apt-get install -qy vim zip mc curl wget openjdk-7-jre scala git
 
 install_mesos $mode
-if [ $mode == "master" ]; then install_marathon; fi
-install_docker
+if [ $mode == "master" ]; then
+    install_marathon;
+    install_kafka
+fi
 
