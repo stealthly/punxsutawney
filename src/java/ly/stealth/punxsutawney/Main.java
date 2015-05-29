@@ -43,7 +43,7 @@ public class Main {
         app.mem = options.mem;
         app.cmd = "java -Xmx" + options.mem + "m -cp punxsutawney.jar ly.stealth.punxsutawney.HttpClient";
 
-        app.env.put("HC_ZK", "master:2181");
+        app.env.put("HC_ZK", options.zk);
         app.env.put("HC_ID", app.id);
 
         HttpServer httpServer = new HttpServer();
@@ -57,7 +57,7 @@ public class Main {
         out.println("Starting app \"" + app.id + "\" ...");
         Marathon.startApp(app);
 
-        out.println("App \"" + app.id + "\" started");
+        out.println("App  started");
         httpServer.stop();
     }
 
@@ -87,6 +87,7 @@ public class Main {
 
     private static class Options {
         public URL marathon;
+        public String zk;
         public URL listen;
 
         public String id;
@@ -100,6 +101,7 @@ public class Main {
 
             OptionParser parser = new OptionParser();
             parser.accepts("marathon", "marathon url (http://master:8080)").withRequiredArg().ofType(String.class);
+            parser.accepts("zk", "zk url (master:2181)").withRequiredArg().ofType(String.class);
             parser.accepts("listen", "listen url to download jar (http://192.168.3.1:5000)").withRequiredArg().ofType(String.class);
 
             parser.accepts("id", "app id").withOptionalArg().ofType(String.class).defaultsTo(app.id);
@@ -130,6 +132,10 @@ public class Main {
             if (marathonValue == null) throw new Error("Undefined marathon option");
             try { marathon = new URL(marathonValue); }
             catch (MalformedURLException e) { throw new Error("Invalid marathon value: " + marathonValue); }
+
+            zk = (String)options.valueOf("zk");
+            if (zk == null) zk = props.getProperty("zk");
+            if (zk == null) throw new Error("Undefined zk option");
 
             String listenValue = (String)options.valueOf("listen");
             if (listenValue == null) listenValue = props.getProperty("listen");

@@ -7,9 +7,9 @@ import kafka.producer.ProducerConfig;
 import java.io.IOException;
 import java.util.Properties;
 
-public class GeneratingEmitter {
+public class SampleEmitter {
     public static void main(String[] args) throws IOException {
-        String topic = "punxsutawney";
+        String topic = Marathon.App.DEFAULT_ID;
 
         Properties props = new Properties();
         props.put("metadata.broker.list", "master:9092");
