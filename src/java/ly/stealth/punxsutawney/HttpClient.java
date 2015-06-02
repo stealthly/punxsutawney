@@ -58,6 +58,7 @@ public class HttpClient {
         org.eclipse.jetty.client.HttpClient client = new org.eclipse.jetty.client.HttpClient();
         client.setConnectTimeout(requests.getTimeout());
         client.setMaxRequestsQueuedPerDestination(requests.size());
+        client.setMaxConnectionsPerDestination(256);
 
         final CountDownLatch completed = new CountDownLatch(requests.size());
 
