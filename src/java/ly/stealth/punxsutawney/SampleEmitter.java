@@ -3,13 +3,15 @@ package ly.stealth.punxsutawney;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
+import org.apache.log4j.BasicConfigurator;
 
 import java.io.IOException;
 import java.util.Properties;
 
 public class SampleEmitter {
     public static void main(String[] args) throws IOException {
-        String topic = "t";
+        BasicConfigurator.configure();
+        String topic = Marathon.App.DEFAULT_ID;
 
         Properties props = new Properties();
         props.put("metadata.broker.list", "master:9092");
