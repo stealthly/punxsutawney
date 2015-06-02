@@ -15,7 +15,7 @@ In order to run the tool following steps should be executed:
 2. Start `./punxsutawney.sh`
 3. Verify app is running via Mesos & Marathon UIs
 4. Start emitting traffic to Kafka topic `punxsutawney` (see SampleEmitter)
-5. Monitor stdout of each HttpClient to see rps, failures, etc
+5. Monitor stdout (via Mesos UI) of each HttpClient to see rps, failures, etc
 
 Note: if running N HttpClient instances, Kafka topic should contain at least N partitions,
 in order for HttpClients to be able to consume concurrently.
